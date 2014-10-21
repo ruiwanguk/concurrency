@@ -26,6 +26,7 @@ public class TaskCompletionUseShutdown {
             start(executorService, counter);
         } finally {
             executorService.shutdown();
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         }
 
         System.out.println("Total number of counts is " + counter + " and should be " + 1000);
@@ -38,13 +39,17 @@ public class TaskCompletionUseShutdown {
                 public void run() {
                     // code here cannot throw InterruptedException,
                     // otherwise, the thread will be terminated.
-                    for (int i = 0; i < 50; i++) {
-                        counter.incrementAndGet();
+                    try {
+                        for (int i = 0; i < 50; i++) {
+                            counter.incrementAndGet();
+
+                            TimeUnit.SECONDS.sleep(1);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             });
-
-            TimeUnit.SECONDS.sleep(5);
         }
 
     }
